@@ -32,6 +32,7 @@ target-versions = ["py36"]
 [tool.isort]
 atomic = true
 profile = "black"
-sections = ["FUTURE", "STDLIB", "FASTAPI", "STARLETTE", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+known_fastapi = ["fastapi", "starlette", "pydantic"]
+sections = ["FUTURE", "STDLIB", "FASTAPI", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
 combine_as_imports = true
 line_length = 120
