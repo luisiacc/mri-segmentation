@@ -8,7 +8,12 @@ license = "MIT"
 [tool.poetry.dependencies]
 python = "^3.9"
 uvicorn = {extras = ["standard"], version = "^0.13.4"}
-fastapi = "^0.63.0"
+Django = "^3.2"
+djangorestframework = "^3.12.4"
+django-filter = "^2.4.0"
+django-js-reverse = "^0.9.1"
+django-phonenumber-field = "^5.1.0"
+psycopg2 = "^2.8.6"
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"
@@ -32,7 +37,7 @@ target-versions = ["py36"]
 [tool.isort]
 atomic = true
 profile = "black"
-known_fastapi = ["fastapi", "starlette", "pydantic"]
-sections = ["FUTURE", "STDLIB", "FASTAPI", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+sections = ["FUTURE", "STDLIB", "DJANGO", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+known_django = ["django", "rest_framework"]
 combine_as_imports = true
 line_length = 120
