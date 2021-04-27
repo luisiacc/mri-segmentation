@@ -12,7 +12,7 @@ class PatientSerializer(serializers.ModelSerializer):
 class MRISerializer(serializers.ModelSerializer):
     class Meta:
         model = MRI
-        fields = ("id", "datetime", "label", "file", "patient")
+        fields = ("id", "datetime", "label", "file", "patient", "thumbnail")
 
 
 class PatientParamSerializer(serializers.Serializer):

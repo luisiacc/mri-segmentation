@@ -1,13 +1,14 @@
 from datetime import datetime
-from hashlib import md5
+from pathlib import Path
 
-from django.core.exceptions import ValidationError
+from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from django.db import models
-from django.conf import settings
 from django.db.models.enums import TextChoices
-from django.utils.encoding import smart_bytes
 from django.utils.translation import ugettext as _
+
+import rarfile
+from dicom_processing.utils import dicom2png
 
 file_storage = FileSystemStorage(location=settings.PRIVATE_STORAGE_ROOT)
 
@@ -33,15 +34,10 @@ class Patient(models.Model):
 
 
 def file_name(instance, filename):
-    ext = (filename.split(".")[1:] or ["dcm"]).pop().lower()
-    now = datetime.now()
-    checksum = md5(smart_bytes(f"{instance.patient.name}{now}")).hexdigest()
-    return f"{checksum}.{ext}"
-
-
-def dicom_file_validator(value):
-    if not value.name.lower().endswith("dcm"):
-        raise ValidationError("We only accept dicom files")
+    ext = filename.split(".")[-1] if "." in filename else ""
+    now = datetime.now().timestamp()
+    filename_without_extension = "".join(x for x in filename.split(".")[:-1])
+    return f"{filename_without_extension}-{now}.{ext}"
 
 
 class MRI(models.Model):
@@ -49,10 +45,30 @@ class MRI(models.Model):
     datetime = models.DateTimeField(null=True, blank=True)
 
     label = models.CharField(max_length=200, blank=True)
-    file = models.FileField(upload_to=file_name, storage=file_storage, validators=[dicom_file_validator])
+    file = models.FileField(upload_to=file_name, storage=file_storage)
 
     patient = models.ForeignKey("Patient", on_delete=models.CASCADE, related_name="resonances")
+
+    def __str__(self):
+        return f"{self.patient.name} - {self.datetime}"
 
     @property
     def date(self):
         return self.datetime.date()
+
+    @property
+    def thumbnail(self):
+        mri_path = Path(self.file.path)
+        thumbnail_name = f"{mri_path.name}.png"
+        thumbnail_path = Path(f"{settings.PRIVATE_STORAGE_ROOT}/{thumbnail_name}")
+        thumbnail_url = f"/{thumbnail_name}"
+
+        if not mri_path.exists() or mri_path.suffix.lower() != ".rar":
+            return ""
+
+        if not thumbnail_path.exists():
+            rar = rarfile.RarFile(mri_path)
+            dcm_list = [x.filename for x in rar.infolist() if x.filename.lower().endswith("dcm")]
+            dicom2png(rar.open(dcm_list[0]), str(thumbnail_path))
+
+        return thumbnail_url

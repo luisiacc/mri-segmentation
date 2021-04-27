@@ -5,6 +5,8 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 PRIVATE_STORAGE_ROOT = os.path.join(BASE_DIR, "storage")
 
+path = lambda *x: os.path.normpath(os.path.abspath(os.path.join(BASE_DIR, *x)))  # noqa
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
@@ -114,6 +116,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = "/static/"
+STATIC_ROOT = path("/storage/static/")
+
+MEDIA_URL = "/storage/"
+MEDIA_ROOT = path("storage")
+
+DEFAULT_FILE_STORAGE = THUMBNAIL_STORAGE = "django.core.files.storage.FileSystemStorage"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field

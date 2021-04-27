@@ -2,11 +2,11 @@
 
 ### Correr servidor django
 
-#### Requerimientos
+#### Dependencieas del sistema
 
-- Poetry
 - Python 3.9
 - PostgreSQL 9.5+
+- unrar -> `sudo apt-get install unrar`
 
 Correr esto en `core`:
 
