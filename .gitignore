@@ -12,5 +12,6 @@ docs/
 htmlcov/
 node_modules/
 storage/
+webui/node_modules
 webpack-stats.json
 yarn-error.log
