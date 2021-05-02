@@ -20,6 +20,7 @@ pydicom = "^2.1.2"
 numpy = "^1.20.2"
 pypng = "^0.0.20"
 rarfile = "^4.0"
+django-environ = "^0.4.5"
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"

@@ -1,17 +1,23 @@
 import os
 from pathlib import Path
 
+import environ
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 PRIVATE_STORAGE_ROOT = os.path.join(BASE_DIR, "storage")
 
 path = lambda *x: os.path.normpath(os.path.abspath(os.path.join(BASE_DIR, *x)))  # noqa
 
+# Initialazing envioronments variables
+env = environ.Env()
+environ.Env().read_env()
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-zp@9n_b^eyqr-omtk3t9(5koe%q#dd)$6)!kjf2+6b7kaej9@f"
+SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -70,11 +76,11 @@ WSGI_APPLICATION = "settings.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": os.environ.get("POSTGRES_DB", "mri-segmentation"),
-        "USER": os.environ.get("POSTGRES_USER", "postgres"),
-        "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "postgres"),
-        "HOST": os.environ.get("POSTGRES_HOST", "localhost"),
-        "PORT": os.environ.get("POSTGRES_PORT", ""),
+        "NAME": os.environ.get("POSTGRES_DB", env("POSTGRES_DB")),
+        "USER": os.environ.get("POSTGRES_USER", env("POSTGRES_USER")),
+        "PASSWORD": os.environ.get("POSTGRES_PASSWORD", env("POSTGRES_PASS")),
+        "HOST": os.environ.get("POSTGRES_HOST", env("POSTGRES_HOST")),
+        "PORT": os.environ.get("POSTGRES_PORT", env("POSTGRES_PORT")),
     }
 }
 
