@@ -1,5 +1,6 @@
 from datetime import datetime
 from pathlib import Path
+from typing import Iterable
 
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
@@ -8,7 +9,9 @@ from django.db.models.enums import TextChoices
 from django.utils.translation import ugettext as _
 
 import rarfile
-from dicom_processing.utils import dicom2png
+from dicom_processing.utils import Cut, FileLike, dicom2png, filter_by_series, get_dcm_files_from_rarfile, get_slice_cut
+
+from .utils import MRIThumbnailBuilder, build_mri_segmented_thumbnail
 
 file_storage = FileSystemStorage(location=settings.PRIVATE_STORAGE_ROOT)
 
@@ -69,6 +72,14 @@ class MRI(models.Model):
         if not thumbnail_path.exists():
             rar = rarfile.RarFile(mri_path)
             dcm_list = [x.filename for x in rar.infolist() if x.filename.lower().endswith("dcm")]
-            dicom2png(rar.open(dcm_list[0]), str(thumbnail_path))
+            dicom2png(rar.open(dcm_list[0]), str(thumbnail_path))  # noqa
 
         return thumbnail_url
+
+    def categorized_images(self):
+        builder = MRIThumbnailBuilder(self)
+
+        if builder.get_mri_path().exists():
+            return builder.get_grouped_images_from_storage()
+
+        return builder.construct_grouped_images()

@@ -15,5 +15,16 @@ class MRISerializer(serializers.ModelSerializer):
         fields = ("id", "datetime", "label", "file", "patient", "thumbnail")
 
 
+class DetailMRISerializer(MRISerializer):
+    images = serializers.SerializerMethodField()
+
+    class Meta:
+        model = MRI
+        fields = MRISerializer.Meta.fields + ("images",)
+
+    def get_images(self, obj):
+        return obj.categorized_images()
+
+
 class PatientParamSerializer(serializers.Serializer):
     patient = serializers.PrimaryKeyRelatedField(queryset=Patient.objects.all())
