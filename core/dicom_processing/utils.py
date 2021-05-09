@@ -1,6 +1,6 @@
 from io import BytesIO, FileIO
 from pathlib import Path
-from typing import BinaryIO, Iterable, Union
+from typing import AsyncIterable, BinaryIO, Iterable, AsyncIterable, Union
 
 from django.core.files.storage import default_storage
 from django.db.models.enums import TextChoices
@@ -29,8 +29,12 @@ def open_dcm(file: Union[str, FileLike]):
     return pydicom.dcmread(file)
 
 
-def dicom2png(source_file: Union[str, FileLike], output_file: str):
-    ds = open_dcm(source_file)
+def dicom2png(source_file: Union[str, FileLike, pydicom.Dataset], output_file: str):
+    if isinstance(source_file, pydicom.Dataset):
+        ds = source_file
+    else:
+        ds = open_dcm(source_file)
+
     shape = ds.pixel_array.shape
 
     # Convert to float to avoid overflow or underflow losses.
@@ -49,10 +53,7 @@ def dicom2png(source_file: Union[str, FileLike], output_file: str):
     default_storage.save(output_file, new_file_stream)
 
 
-def get_slice_cut(dcm: Union[pydicom.Dataset, FileLike]) -> Cut:
-    if not isinstance(dcm, pydicom.Dataset):
-        dcm = open_dcm(dcm)
-
+def get_slice_cut(dcm: pydicom.Dataset) -> Cut:
     IOP: list = getattr(dcm, "ImageOrientationPatient", [])
     assert len(IOP), "ImageOrientationPatient no puede ser una lista vacia"
 
@@ -70,11 +71,7 @@ def get_slice_cut(dcm: Union[pydicom.Dataset, FileLike]) -> Cut:
     return Cut.Unknown
 
 
-def filter_by_series(dcm_list: Iterable[pydicom.Dataset], exclude=(DEFAULT_EXCLUDED_CUT,)) -> list[pydicom.Dataset]:
-    return [dcm for dcm in dcm_list if dcm.SeriesDescription not in exclude]
-
-
-def get_dcm_files_from_rarfile(rar_path: Union[str, Path]) -> Iterable[FileLike]:
+async def get_dcm_files_from_rarfile(rar_path: Union[str, Path]) -> AsyncIterable[FileLike]:
     rar = rarfile.RarFile(rar_path)
     dcms = (dcm for dcm in rar.infolist() if dcm.filename.lower().endswith("dcm"))
     for file in dcms:

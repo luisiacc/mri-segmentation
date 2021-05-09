@@ -1,6 +1,5 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Iterable
 
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
@@ -9,9 +8,9 @@ from django.db.models.enums import TextChoices
 from django.utils.translation import ugettext as _
 
 import rarfile
-from dicom_processing.utils import Cut, FileLike, dicom2png, filter_by_series, get_dcm_files_from_rarfile, get_slice_cut
+from dicom_processing.utils import dicom2png
 
-from .utils import MRIThumbnailBuilder, build_mri_segmented_thumbnail
+from .utils import MRIThumbnailsManager
 
 file_storage = FileSystemStorage(location=settings.PRIVATE_STORAGE_ROOT)
 
@@ -61,6 +60,7 @@ class MRI(models.Model):
 
     @property
     def thumbnail(self):
+        # TODO pasar este codigo a una implementacion de MRIThumbnailManager
         mri_path = Path(self.file.path)
         thumbnail_name = f"{mri_path.name}.png"
         thumbnail_path = Path(f"{settings.PRIVATE_STORAGE_ROOT}/{thumbnail_name}")
@@ -77,9 +77,13 @@ class MRI(models.Model):
         return thumbnail_url
 
     def categorized_images(self):
-        builder = MRIThumbnailBuilder(self)
+        import asyncio
+
+        builder = MRIThumbnailsManager(self)
 
         if builder.get_mri_path().exists():
             return builder.get_grouped_images_from_storage()
 
-        return builder.construct_grouped_images()
+        var = asyncio.run(builder.build_grouped_images())
+
+        return var
