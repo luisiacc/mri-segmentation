@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 from pathlib import Path
 
@@ -8,6 +9,7 @@ from django.db.models.enums import TextChoices
 from django.utils.translation import ugettext as _
 
 import rarfile
+
 from dicom_processing.utils import dicom2png
 
 from .utils import MRIThumbnailsManager
@@ -77,13 +79,8 @@ class MRI(models.Model):
         return thumbnail_url
 
     def categorized_images(self):
-        import asyncio
-
         builder = MRIThumbnailsManager(self)
-
         if builder.get_mri_path().exists():
             return builder.get_grouped_images_from_storage()
-
         var = asyncio.run(builder.build_grouped_images())
-
         return var

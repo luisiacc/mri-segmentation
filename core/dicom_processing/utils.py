@@ -1,6 +1,6 @@
 from io import BytesIO, FileIO
 from pathlib import Path
-from typing import AsyncIterable, BinaryIO, Iterable, AsyncIterable, Union
+from typing import BinaryIO, Iterable, Union
 
 from django.core.files.storage import default_storage
 from django.db.models.enums import TextChoices
@@ -71,7 +71,7 @@ def get_slice_cut(dcm: pydicom.Dataset) -> Cut:
     return Cut.Unknown
 
 
-async def get_dcm_files_from_rarfile(rar_path: Union[str, Path]) -> AsyncIterable[FileLike]:
+def get_dcm_files_from_rarfile(rar_path: Union[str, Path]) -> Iterable[FileLike]:
     rar = rarfile.RarFile(rar_path)
     dcms = (dcm for dcm in rar.infolist() if dcm.filename.lower().endswith("dcm"))
     for file in dcms:
