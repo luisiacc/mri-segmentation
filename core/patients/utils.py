@@ -6,7 +6,6 @@ from django.core.files.storage import default_storage
 
 import pydicom
 import rarfile
-
 from dicom_processing.utils import Cut, FileLike, dicom2png, get_slice_cut, open_dcm
 
 GroupedCuts = dict[str, list]
@@ -50,9 +49,6 @@ class MRIThumbnailsManager:
         return grouped_images
 
     def build_grouped_images(self):
-        import timeit
-
-        time = timeit.default_timer()
         images = self.decompresser.get_files()
         grouped_images = self.create_grouped_images_base_structure()
 
@@ -60,7 +56,6 @@ class MRIThumbnailsManager:
             data = SingleDicomFileManager.get_cut_and_path(self, file)
             if not data.excluded:
                 grouped_images[data.cut_name].append(get_file_url(data.full_path))
-        print(timeit.default_timer() - time)
 
         return grouped_images
 
@@ -89,12 +84,15 @@ class SingleDicomFileManager:
     @staticmethod
     def get_cut_and_path(mri_manager, file):
         DicomThumbnailData = namedtuple("DicomThumbnailData", ["cut_name", "full_path", "excluded"])
-        dicom_file = SingleDicomFileManager(mri_manager, file)
-        image_thumbnail_path = dicom_file.build_mri_segmented_thumbnail()
-        dcm_cut = dicom_file.get_cut()
-        return DicomThumbnailData(dcm_cut.value, image_thumbnail_path, dicom_file.should_be_excluded())
+        dicom_manager = SingleDicomFileManager(mri_manager, file)
+        image_thumbnail_path = dicom_manager.build_mri_segmented_thumbnail()
+        dcm_cut = dicom_manager.get_cut()
+        return DicomThumbnailData(dcm_cut.value, image_thumbnail_path, dicom_manager.should_be_excluded())
 
     def build_mri_segmented_thumbnail(self):
+        if self.should_be_excluded():
+            return None
+
         dcm_file = self.get_dataset()
         final_path = self.build_mri_slice_path(dcm_file)
 
@@ -112,7 +110,7 @@ class SingleDicomFileManager:
 
     def should_be_excluded(self):
         # annadir aqui mas condiciones si en el futuro se requieren
-        return self.get_dataset().SeriesDescription == self.DEFAULT_EXCLUDED_DESCRIPTION
+        return str(self.get_dataset().SeriesDescription).strip() == self.DEFAULT_EXCLUDED_DESCRIPTION
 
     def get_dataset(self):
         if not self.dcm_dataset:
