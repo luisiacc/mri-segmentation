@@ -6,6 +6,7 @@ from django.core.files.storage import default_storage
 
 import pydicom
 import rarfile
+
 from dicom_processing.utils import Cut, FileLike, dicom2png, get_slice_cut, open_dcm
 
 GroupedCuts = dict[str, list]
@@ -77,8 +78,8 @@ class SingleDicomFileManager:
     DEFAULT_EXCLUDED_DESCRIPTION = "T2 TSE Tra"
 
     def __init__(self, mri_manager: MRIThumbnailsManager, file: FileLike):
-        self.mri_manager = mri_manager
         self.file = file
+        self.mri_manager = mri_manager
         self.dcm_dataset: Optional[pydicom.Dataset] = None
 
     @staticmethod

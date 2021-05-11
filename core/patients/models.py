@@ -1,4 +1,3 @@
-import asyncio
 from datetime import datetime
 from pathlib import Path
 
@@ -83,5 +82,4 @@ class MRI(models.Model):
         builder = MRIThumbnailsManager(self, decompresser)
         if builder.get_mri_path().exists():
             return builder.get_grouped_images_from_storage()
-        var = builder.build_grouped_images()
-        return var
+        return builder.build_grouped_images()
