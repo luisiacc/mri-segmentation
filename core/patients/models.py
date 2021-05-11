@@ -2,16 +2,16 @@ from datetime import datetime
 from pathlib import Path
 
 from django.conf import settings
-from django.core.files.storage import FileSystemStorage
+from django.core.files.storage import FileSystemStorage, default_storage
 from django.db import models
 from django.db.models.enums import TextChoices
 from django.utils.translation import ugettext as _
 
 import rarfile
 
-from dicom_processing.utils import dicom2png
+from dicom_processing.utils import Cut, dicom2png
 
-from .utils import MRIDecompressManager, MRIThumbnailsManager
+from .utils import MRIDecompressManager, MRIThumbnailsManager, get_file_url
 
 file_storage = FileSystemStorage(location=settings.PRIVATE_STORAGE_ROOT)
 
@@ -53,7 +53,7 @@ class MRI(models.Model):
     patient = models.ForeignKey("Patient", on_delete=models.CASCADE, related_name="resonances")
 
     def __str__(self):
-        return f"{self.patient.name} - {self.datetime}"
+        return f"MRI for {self.patient.name} - {self.datetime}"
 
     @property
     def date(self):
@@ -61,23 +61,17 @@ class MRI(models.Model):
 
     @property
     def thumbnail(self):
-        # TODO pasar este codigo a una implementacion de MRIThumbnailManager
-        mri_path = Path(self.file.path)
-        thumbnail_name = f"{mri_path.name}.png"
-        thumbnail_path = Path(f"{settings.PRIVATE_STORAGE_ROOT}/{thumbnail_name}")
-        thumbnail_url = f"/{thumbnail_name}"
-
-        if not mri_path.exists() or mri_path.suffix.lower() != ".rar":
+        builder = MRIThumbnailsManager(self)
+        if not builder.get_mri_path().exists():
             return ""
+        return builder.get_grouped_images_from_storage()[Cut.Axial][0]
 
-        if not thumbnail_path.exists():
-            rar = rarfile.RarFile(mri_path)
-            dcm_list = [x.filename for x in rar.infolist() if x.filename.lower().endswith("dcm")]
-            dicom2png(rar.open(dcm_list[0]), str(thumbnail_path))  # noqa
+    @property
+    def segmented_images(self):
+        builder = MRIThumbnailsManager(self)
+        return builder.get_grouped_images_from_storage()
 
-        return thumbnail_url
-
-    def categorized_images(self):
+    def build_segmented_images(self):
         decompresser = MRIDecompressManager(self)
         builder = MRIThumbnailsManager(self, decompresser)
         if builder.get_mri_path().exists():

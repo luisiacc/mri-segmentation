@@ -36,7 +36,8 @@ class MRIDecompressManager:
 class MRIThumbnailsManager:
     MAIN_THUMBNAILS_FOLDER = "file-mris"
 
-    def __init__(self, mri, decompresser: MRIDecompressManager):
+    def __init__(self, mri, decompresser: MRIDecompressManager = None):
+        # si no se pasa el decompresesr, no se pueden construir las imagenes
         self.mri = mri
         self.decompresser = decompresser
 
@@ -50,6 +51,7 @@ class MRIThumbnailsManager:
         return grouped_images
 
     def build_grouped_images(self):
+        assert self.decompresser, "Debes establecer un descompresor para poder construir las imagenes"
         images = self.decompresser.get_files()
         grouped_images = self.create_grouped_images_base_structure()
 
@@ -90,12 +92,12 @@ class SingleDicomFileManager:
         dcm_cut = dicom_manager.get_cut()
         return DicomThumbnailData(dcm_cut.value, image_thumbnail_path, dicom_manager.should_be_excluded())
 
-    def build_mri_segmented_thumbnail(self):
+    def build_mri_segmented_thumbnail(self, path: Optional[str] = None):
         if self.should_be_excluded():
             return None
 
         dcm_file = self.get_dataset()
-        final_path = self.build_mri_slice_path(dcm_file)
+        final_path = path or self.build_mri_slice_path(dcm_file)
 
         if not default_storage.exists(final_path):
             dicom2png(dcm_file, str(final_path))
