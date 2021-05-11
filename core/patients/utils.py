@@ -1,6 +1,6 @@
 from collections import namedtuple
 from pathlib import Path
-from typing import Optional, Union
+from typing import Generator, Optional, Union
 
 from django.core.files.storage import default_storage
 
@@ -10,7 +10,7 @@ import rarfile
 from dicom_processing.utils import Cut, FileLike, dicom2png, get_slice_cut, open_dcm
 
 GroupedCuts = dict[str, list]
-
+DicomThumbnailData = namedtuple("DicomThumbnailData", ["cut_name", "full_path", "excluded"])
 
 class MRIDecompressManager:
     MAIN_DECOMPRESS_FOLDER = "decompressed"
@@ -26,7 +26,7 @@ class MRIDecompressManager:
         files_to_extract = (file for file in compressed_file.infolist() if file.filename.lower().endswith(".dcm"))
         compressed_file.extractall(self.get_decompression_path(), files_to_extract)
 
-    def get_files(self, pattern="**/*.dcm"):
+    def get_files(self, pattern="**/*.dcm") -> Generator:
         if not self.get_decompression_path().exists():
             self.decompress()
 
@@ -50,7 +50,7 @@ class MRIThumbnailsManager:
 
         return grouped_images
 
-    def build_grouped_images(self):
+    def build_grouped_images(self) -> GroupedCuts:
         assert self.decompresser, "Debes establecer un descompresor para poder construir las imagenes"
         images = self.decompresser.get_files()
         grouped_images = self.create_grouped_images_base_structure()
@@ -63,16 +63,16 @@ class MRIThumbnailsManager:
         return grouped_images
 
     @classmethod
-    def get_main_folder_path(cls):
+    def get_main_folder_path(cls) -> Path:
         return Path(f"{default_storage.base_location}/{cls.MAIN_THUMBNAILS_FOLDER}/")
 
-    def get_mri_path(self):
+    def get_mri_path(self) -> Path:
         return self.get_main_folder_path() / str(self.mri.pk)
 
-    def get_cut_path(self, cut: Union[str, Cut]):
+    def get_cut_path(self, cut: Union[str, Cut]) -> Path:
         return self.get_mri_path() / str(cut)
 
-    def get_images_list_from_cut(self, cut: Union[str, Cut]):
+    def get_images_list_from_cut(self, cut: Union[str, Cut]) -> Generator:
         return (get_file_url(file) for file in self.get_cut_path(cut).glob("*"))
 
     @classmethod
@@ -89,8 +89,7 @@ class SingleDicomFileManager:
         self.dcm_dataset: Optional[pydicom.Dataset] = None
 
     @staticmethod
-    def get_cut_and_path(mri_manager, file):
-        DicomThumbnailData = namedtuple("DicomThumbnailData", ["cut_name", "full_path", "excluded"])
+    def get_cut_and_path(mri_manager, file) -> DicomThumbnailData:
         dicom_manager = SingleDicomFileManager(mri_manager, file)
         image_thumbnail_path = dicom_manager.build_mri_segmented_thumbnail()
         dcm_cut = dicom_manager.get_cut()
@@ -115,15 +114,15 @@ class SingleDicomFileManager:
         cut_name = get_slice_cut(self.get_dataset())
         return self.mri_manager.get_cut_path(cut_name) / f"{dcm.SOPInstanceUID}.png"
 
-    def should_be_excluded(self):
+    def should_be_excluded(self) -> bool:
         # annadir aqui mas condiciones si en el futuro se requieren
         return str(self.get_dataset().SeriesDescription).strip() == self.DEFAULT_EXCLUDED_DESCRIPTION
 
-    def get_dataset(self):
+    def get_dataset(self) -> pydicom.Dataset:
         if not self.dcm_dataset:
             self.dcm_dataset = open_dcm(self.file)
         return self.dcm_dataset
 
 
-def get_file_url(file: Path):
+def get_file_url(file: Path) -> str:
     return default_storage.url(str(file.relative_to(default_storage.base_location)))
