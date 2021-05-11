@@ -62,8 +62,12 @@ class MRIThumbnailsManager:
 
         return grouped_images
 
+    @classmethod
+    def get_main_folder_path(cls):
+        return Path(f"{default_storage.base_location}/{cls.MAIN_THUMBNAILS_FOLDER}/")
+
     def get_mri_path(self):
-        return Path(f"{default_storage.base_location}/{self.MAIN_THUMBNAILS_FOLDER}/{self.mri.pk}/")
+        return self.get_main_folder_path() / str(self.mri.pk)
 
     def get_cut_path(self, cut: Union[str, Cut]):
         return self.get_mri_path() / str(cut)
