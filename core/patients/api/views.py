@@ -28,7 +28,7 @@ class MRIViewSet(viewsets.ModelViewSet, NestedPatientMixin):
     queryset = models.MRI.objects.all()
 
     def get_serializer_class(self):
-        if self.action == "retrieve":
+        if self.action in ("retrieve", "create"):
             return self.detail_serializer_class
         else:
             return self.serializer_class
