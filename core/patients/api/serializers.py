@@ -12,18 +12,12 @@ class PatientSerializer(serializers.ModelSerializer):
 class MRISerializer(serializers.ModelSerializer):
     class Meta:
         model = MRI
-        fields = ("id", "datetime", "label", "file", "patient", "thumbnail")
+        fields = ("id", "datetime", "label", "file", "patient", "thumbnail", "segmented_images")
 
     def create(self, validated_data):
         instance: MRI = super().create(validated_data)
         instance.build_segmented_images()
         return instance
-
-
-class DetailMRISerializer(MRISerializer):
-    class Meta:
-        model = MRI
-        fields = MRISerializer.Meta.fields + ("segmented_images",)
 
 
 class PatientParamSerializer(serializers.Serializer):

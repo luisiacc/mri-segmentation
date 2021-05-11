@@ -2,7 +2,7 @@ from rest_framework import viewsets
 
 from patients import models
 
-from .serializers import PatientParamSerializer, PatientSerializer, MRISerializer, DetailMRISerializer
+from .serializers import MRISerializer, PatientParamSerializer, PatientSerializer
 
 
 class NestedPatientMixin:
@@ -24,14 +24,7 @@ class PatientViewSet(viewsets.ModelViewSet):
 
 class MRIViewSet(viewsets.ModelViewSet, NestedPatientMixin):
     serializer_class = MRISerializer
-    detail_serializer_class = DetailMRISerializer
     queryset = models.MRI.objects.all()
-
-    def get_serializer_class(self):
-        if self.action in ("retrieve", "create"):
-            return self.detail_serializer_class
-        else:
-            return self.serializer_class
 
     def get_queryset(self):
         return super().get_queryset().filter(patient__pk=self.get_patient_pk())
