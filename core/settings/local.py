@@ -10,8 +10,15 @@ PRIVATE_STORAGE_ROOT = os.path.join(BASE_DIR, "storage")
 path = lambda *x: os.path.normpath(os.path.abspath(os.path.join(BASE_DIR, *x)))  # noqa
 
 # Initialazing envioronments variables
-env = environ.Env()
-environ.Env().read_env()
+env = environ.Env(
+    POSTGRES_DB=(str, "mri-segmentation"),
+    POSTGRES_USER=(str, "postgres"),
+    POSTGRES_PASS=(str, "postgres"),
+    POSTGRES_HOST=(str, "localhost"),
+    POSTGRES_PORT=(str, ""),
+    SECRET_KEY=(str,),
+)
+environ.Env.read_env("../.env")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -76,11 +83,11 @@ WSGI_APPLICATION = "settings.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": os.environ.get("POSTGRES_DB", env("POSTGRES_DB")),
-        "USER": os.environ.get("POSTGRES_USER", env("POSTGRES_USER")),
-        "PASSWORD": os.environ.get("POSTGRES_PASSWORD", env("POSTGRES_PASS")),
-        "HOST": os.environ.get("POSTGRES_HOST", env("POSTGRES_HOST")),
-        "PORT": os.environ.get("POSTGRES_PORT", env("POSTGRES_PORT")),
+        "NAME": env("POSTGRES_DB"),
+        "USER": env("POSTGRES_USER"),
+        "PASSWORD": env("POSTGRES_PASS"),
+        "HOST": env("POSTGRES_HOST"),
+        "PORT": env("POSTGRES_PORT"),
     }
 }
 

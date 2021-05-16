@@ -26,13 +26,14 @@ POSTGRES_PASS=admin
 POSTGRES_HOST=localhost
 POSTGRES_PORT=''
 ```
+### Corre esto para iniciar el servidor
 
 ```
 poetry run manage.py migrate
 poetry run manage.py runserver 8000
 ```
 
-#### Y si no esta usando un enviroment basado en unix
+#### Y si no esta usando un enviroment basado en unix estos
 
 ```
 poetry run python manage.py migrate

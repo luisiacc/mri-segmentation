@@ -2,7 +2,7 @@ from rest_framework import viewsets
 
 from patients import models
 
-from .serializers import PatientParamSerializer, PatientSerializer, MRISerializer
+from .serializers import MRISerializer, PatientParamSerializer, PatientSerializer
 
 
 class NestedPatientMixin:
