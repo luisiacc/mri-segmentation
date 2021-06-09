@@ -13,10 +13,10 @@ path = lambda *x: os.path.normpath(os.path.abspath(os.path.join(BASE_DIR, *x))) 
 env = environ.Env(
     POSTGRES_DB=(str, "mri-segmentation"),
     POSTGRES_USER=(str, "postgres"),
-    POSTGRES_PASS=(str, "postgres"),
+    POSTGRES_PASS=(str, "admin"),
     POSTGRES_HOST=(str, "localhost"),
     POSTGRES_PORT=(str, ""),
-    SECRET_KEY=(str,),
+    SECRET_KEY=(str,"django-insecure-zp@9n_b^eyqr-omtk3t9(5koe%q#dd)$6)!kjf2+6b7kaej9@f"),
 )
 environ.Env.read_env("../.env")
 

@@ -1,4 +1,4 @@
-import { AxiosRequestConfig, Method } from "axios"
+import { AxiosRequestConfig, Method } from 'axios'
 
 export type AxiosQueryParams = {
   method: Method
