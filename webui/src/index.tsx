@@ -3,22 +3,36 @@ import { StrictMode } from 'react'
 import ReactDOM from 'react-dom'
 
 import CssBaseline from '@material-ui/core/CssBaseline'
-import { ThemeProvider } from '@material-ui/core/styles'
+import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles'
 import { QueryClientProvider } from 'react-query'
 
 import App from './App'
 import { queryClient } from './utils'
 import reportWebVitals from './reportWebVitals'
-import { theme } from './utils'
+
+const theme = createMuiTheme({
+  palette: {
+    primary: {
+      main: '#fefefe',
+    },
+  },
+  typography: {
+    fontFamily: 'Quicksand',
+    fontWeightLight: 400,
+    fontWeightRegular: 500,
+    fontWeightMedium: 600,
+    fontWeightBold: 700,
+  },
+})
 
 ReactDOM.render(
   <StrictMode>
     <CssBaseline />
-    {/* <ThemeProvider theme={theme}> */}
-    <QueryClientProvider client={queryClient}>
-      <App />
-    </QueryClientProvider>
-    {/* </ThemeProvider> */}
+    <ThemeProvider theme={theme}>
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
+    </ThemeProvider>
   </StrictMode>,
   document.getElementById('root'),
 )

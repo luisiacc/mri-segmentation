@@ -1,8 +1,9 @@
 import { Button } from '@material-ui/core'
 import React from 'react'
-import { QueryClient, QueryClientProvider } from 'react-query'
+import { Navigation } from './components'
+import { QueryClient } from 'react-query'
 
-import { useFetchDataPatients, useFetchDataMRIs } from './hooks'
+import { useFetchPatients, useFetchMRI } from './hooks'
 
 export type PatientType = {
   id?: number
@@ -22,17 +23,12 @@ export type MRIsParams = {
 const queryClient = new QueryClient()
 
 const App = () => {
-  return (
-    <div>
-      <ExamplePatientApi />
-      <ExampleMRIsApi />
-    </div>
-  )
+  return <Navigation />
 }
 
 function ExamplePatientApi() {
-  const { isLoading, error, data } = useFetchDataPatients()
-  console.log(data)
+  const { isLoading, error, data } = useFetchPatients()
+  console.log('patients', data)
 
   if (isLoading) return <p>Loading... </p>
 
@@ -51,17 +47,17 @@ function ExamplePatientApi() {
 }
 
 function ExampleMRIsApi() {
-  const { isLoading, error, data } = useFetchDataMRIs({ file: '', patient: '' })
-  console.log(data)
+  const { isLoading, error, data, refetch } = useFetchMRI('1')
+  console.log('mris', data)
 
   if (isLoading) return <p>Loading... </p>
 
   if (error) return <p>{'An error has occurred: ' + error.message}</p>
 
   return (
-    <Button variant="contained" component="label">
+    <Button variant="contained" component="label" onClick={() => refetch()}>
       Upload File
-      <input type="file" hidden />
+      {/*  <input type="file" hidden /> */}
     </Button>
   )
 }

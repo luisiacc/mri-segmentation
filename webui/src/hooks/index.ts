@@ -1,2 +1,2 @@
 export * from './useFetchPatients'
-export * from './useFetchMRIs'
+export * from './useFetchMRI'

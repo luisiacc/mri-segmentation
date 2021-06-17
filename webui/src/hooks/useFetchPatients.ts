@@ -1,9 +1,9 @@
 import { useQuery } from 'react-query'
 
-import { fetchPatients } from '../requests/api'
+import { getPatients } from '../requests/api'
 
-export function useFetchDataPatients() {
-  const response = useQuery<any, Error>('fetch-patients', fetchPatients, {
+export function useFetchPatients() {
+  const response = useQuery<any, Error>('fetch-patients', getPatients, {
     refetchOnWindowFocus: false,
   })
 
