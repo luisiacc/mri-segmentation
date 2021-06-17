@@ -15,12 +15,11 @@ export type PatientType = {
 //CRUD Patients
 export const getPatients = () => axios.get(`${API_URL}/patients`)
 
-export const addPatient = (patient: PatientType) => axios.post(`${API_URL}/patients/`, { params: { patient } })
+export const addPatient = (patient: PatientType) => axios.post(`${API_URL}/patients/`, patient)
 
-export const updatePatient = (patient: PatientType) =>
-  axios.put(`${API_URL}/patients/${patient.id}`, { params: { patient } })
+export const updatePatient = (patient: PatientType) => axios.put(`${API_URL}/patients/${patient.id}/`, patient)
 
-export const deletePatient = (patient: number) => axios.delete(`${API_URL}/patients/${patient}`)
+export const deletePatient = (patient: number) => axios.delete(`${API_URL}/patients/${patient}/`)
 
 //CRUD MRI
 export const getMRI = (patient: string) => axios.get(`${API_URL}/mris/`, { params: { patient } })
