@@ -41,3 +41,5 @@ poetry run python manage.py runserver 8000
 ```
 
 Listo!.
+
+Aqui checando cambios! 
